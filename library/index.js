@@ -1,7 +1,25 @@
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
 const { v1: uuid } = require("uuid");
+const mongoose = require("mongoose");
+mongoose.set("strictQuery", false);
+const Book = require("./models/book");
+const Author = require("./models/author");
 
+require("dotenv").config();
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log("connected to DB");
+  })
+  .catch((error) => {
+    console.log("error connecting to mongoDB", error.message);
+  });
+
+/*
 let authors = [
   {
     name: "Robert Martin",
@@ -26,7 +44,8 @@ let authors = [
     name: "Sandi Metz", // birthyear not known
     id: "afa5b6f3-344d-11e9-a414-719c6709cf3e",
   },
-];
+]; 
+*/
 
 /*
  * Suomi:
@@ -41,7 +60,7 @@ let authors = [
  * Podría tener más sentido asociar un libro con su autor almacenando la id del autor en el contexto del libro en lugar del nombre del autor
  * Sin embargo, por simplicidad, almacenaremos el nombre del autor en conexión con el libro
  */
-
+/*
 let books = [
   {
     title: "Clean Code",
@@ -93,7 +112,7 @@ let books = [
     genres: ["classic", "revolution"],
   },
 ];
-
+*/
 /*
   you can remove the placeholder query once your first one has been implemented 
 */
@@ -102,7 +121,7 @@ const typeDefs = `
   type Book {
     title: String!
     published: Int!
-    author: String!
+    author: Author!
     id: ID!
     genres: [String!]!
   }
@@ -137,34 +156,28 @@ const typeDefs = `
 
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allBooks: (root, args) => {
-  //      if (args && (args.author || args.genre)) {
-  //   // Filter books based on provided arguments
-  //   return books.filter((book) => {
-  //     const authorMatch = !args.author || book.author === args.author;
-  //     const genreMatch = !args.genre || book.genres.includes(args.genre);
-  //     return authorMatch && genreMatch;
-  //   });
-  // } else {
-  //   // Return all books if no arguments are provided
-  //   return books;
-  // }
-      if(!args.genre && !args.author) return books;
+    bookCount: async () => Book.collection.countDocuments(),
+    authorCount: async () => Author.collection.countDocuments(),
+    allBooks: async (root, args) => {
+      if (!args.genre && !args.author) return Book.find({});
 
-      if (!args.genre)
-        return books.filter((book) => book.author === args.author);
-      else if (!args.author)
-        return books.filter((book) => book.genres.includes(args.genre));
-      else {
-        return books.filter(
-          (book) =>
-            book.author === args.author && book.genres.includes(args.genre),
-        );
+      if (!args.genre) {
+        const author = await Author.findOne({ name: args.author });
+        return Book.find({ author: author._id });
+      } else if (!args.author) {
+        return Book.find({ genres: { $all: [args.genre] } });
+      } else {
       }
     },
-    allAuthors: () => authors,
+    allAuthors: async () => Author.find({}),
+  },
+
+  Book: {
+    author: async (root) => {
+      const author = await Author.findById(root.author);
+      if (!author) throw new Error("Author not found");
+      return author;
+    },
   },
 
   Author: {
@@ -174,14 +187,14 @@ const resolvers = {
   },
 
   Mutation: {
-    addBook: (root, args) => {
-      if (!authors.find((author) => author === args.author)) {
-        const newAuthor = { id: uuid(), name: args.author };
-        authors = authors.concat(newAuthor);
+    addBook: async (root, args) => {
+      let author = await Author.findOne({ name: args.author });
+      if (!author) {
+        author = new Author({ name: args.author });
+        await author.save();
       }
-      const newBook = { ...args, id: uuid() };
-      books = books.concat(newBook);
-      return newBook;
+      const newBook = new Book({ ...args, author: author._id });
+      return newBook.save();
     },
 
     editAuthor: (root, args) => {
