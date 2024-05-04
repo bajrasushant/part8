@@ -5,6 +5,8 @@ const Authors = () => {
   const result = useQuery(ALL_AUTHORS);
   if (result.loading) return <div>fetching...</div>;
 
+  console.log(result);
+
   const authors = result.data.allAuthors;
 
   return (

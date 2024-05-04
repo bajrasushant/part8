@@ -186,13 +186,20 @@ const resolvers = {
 
       if (!args.genre) {
         const author = await Author.findOne({ name: args.author });
+        if(!author) return [];
         return Book.find({ author: author._id });
       } else if (!args.author) {
         return Book.find({ genres: { $all: [args.genre] } });
       } else {
+        const authorSent = await Author.findOne({ name: args.author });
+        if(!authorSent) return [];
+        return Book.find({
+          author: authorSent._id,
+          genres: { $all: [args.genre] },
+        });
       }
     },
-    allAuthors: async () => Author.find({}),
+    allAuthors: async () => await Author.find({}),
     me: (root, args, context) => {
       return context.currentUser;
     },
@@ -207,8 +214,9 @@ const resolvers = {
   },
 
   Author: {
-    bookCount: (root) => {
-      return books.filter((book) => book.author === root.name).length;
+    bookCount: async (root) => {
+      const count = await Book.collection.countDocuments({ author: root._id });
+      return count;
     },
   },
 
