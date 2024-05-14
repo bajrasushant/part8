@@ -10,6 +10,10 @@ const NewBook = () => {
   const [genres, setGenres] = useState([]);
 
   const [addNewBook] = useMutation(ADD_BOOK, {
+    onError: (error) => {
+      const messages = error.graphQLErrors.map(e => e.message).join('\n')
+      console.log(messages);
+    },
     refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
   });
 

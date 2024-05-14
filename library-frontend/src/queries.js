@@ -18,6 +18,7 @@ export const ALL_BOOKS = gql`
       }
       published
       title
+      genres
     }
   }
 `;
@@ -35,7 +36,7 @@ export const ADD_BOOK = gql`
       published: $published
       genres: $genres
     ) {
-      author{
+      author {
         name
       }
       genres

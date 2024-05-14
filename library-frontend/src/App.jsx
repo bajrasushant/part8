@@ -4,13 +4,20 @@ import Books from "./components/Books";
 import NewBook from "./components/NewBook";
 import EditBorn from "./components/EditBorn";
 import LoginForm from "./components/LoginForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApolloClient } from "@apollo/client";
 
 const App = () => {
   const navigate = useNavigate();
   const [token, setToken] = useState(null);
   const client = useApolloClient();
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("library-user-token");
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
 
   const logout = () => {
     setToken(null);
@@ -23,14 +30,13 @@ const App = () => {
       <div>
         <button onClick={() => navigate("/")}>authors</button>
         <button onClick={() => navigate("/books")}>books</button>
-        {console.log(token)}
-        {token !== null ? (
+        {token ? (
           <>
             <button onClick={() => navigate("/add")}>add book</button>
             <button onClick={() => navigate("/editBorn")}>edit born</button>
           </>
         ) : null}
-        {token === null ? (
+        {!token ? (
           <button onClick={() => navigate("/login")}>login</button>
         ) : (
           <button onClick={() => logout}>logout</button>
