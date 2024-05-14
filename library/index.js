@@ -248,7 +248,7 @@ const resolvers = {
       }
       const newBook = new Book({ ...args, author: author._id });
       try {
-        newBook.save();
+        await newBook.save();
       } catch (error) {
         throw new GraphQLError("Saving book failed", {
           extensions: {
@@ -268,10 +268,10 @@ const resolvers = {
       return authorToEdit.save();
     },
 
-    createUser: (root, args) => {
+    createUser: async (root, args) => {
       const user = new User({ ...args });
 
-      return user.save().catch((error) => {
+      return await user.save().catch((error) => {
         throw new GraphQLError("Creating user failed", {
           extensions: {
             code: "BAD_USER_INPUT",

@@ -23,8 +23,13 @@ const App = () => {
       <div>
         <button onClick={() => navigate("/")}>authors</button>
         <button onClick={() => navigate("/books")}>books</button>
-        <button onClick={() => navigate("/add")}>add book</button>
-        <button onClick={() => navigate("/editBorn")}>edit born</button>
+        {console.log(token)}
+        {token !== null ? (
+          <>
+            <button onClick={() => navigate("/add")}>add book</button>
+            <button onClick={() => navigate("/editBorn")}>edit born</button>
+          </>
+        ) : null}
         {token === null ? (
           <button onClick={() => navigate("/login")}>login</button>
         ) : (

@@ -16,8 +16,13 @@ const NewBook = () => {
   const submit = async (event) => {
     event.preventDefault();
 
-    addNewBook({
-      variables: { title, author, published: parseInt(published), genres },
+    await addNewBook({
+      variables: {
+        title: title.length > 5 ? title : undefined,
+        author,
+        published: parseInt(published),
+        genres,
+      },
     });
 
     setTitle("");
