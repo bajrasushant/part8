@@ -5,9 +5,8 @@ import NewBook from "./components/NewBook";
 import EditBorn from "./components/EditBorn";
 import LoginForm from "./components/LoginForm";
 import { useEffect, useState } from "react";
-import { useApolloClient, useQuery } from "@apollo/client";
+import { useApolloClient } from "@apollo/client";
 import Recommended from "./components/Recommended";
-import { ALL_BOOKS } from "./queries";
 
 const App = () => {
   const navigate = useNavigate();
@@ -21,10 +20,6 @@ const App = () => {
     }
   }, []);
 
-  const bookData= useQuery(ALL_BOOKS);
-  if(bookData.loading) return <div>loading...</div>
-  const books = bookData.data.allBooks;
-  
   const logout = () => {
     setToken(null);
     localStorage.clear();
@@ -53,13 +48,13 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Authors />} />
 
-        <Route path="/books" element={<Books books={books}/>} />
+        <Route path="/books" element={<Books />} />
 
         <Route path="/add" element={<NewBook />} />
 
         <Route path="/editBorn" element={<EditBorn />} />
 
-        <Route path="/recommend" element={<Recommended books={books}/>} />
+        <Route path="/recommend" element={<Recommended />} />
 
         <Route path="/login" element={<LoginForm setToken={setToken} />} />
       </Routes>

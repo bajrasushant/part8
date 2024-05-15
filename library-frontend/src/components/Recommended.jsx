@@ -1,11 +1,14 @@
 import { useQuery } from "@apollo/client";
-import { ME } from "../queries";
+import { ALL_BOOKS, ME } from "../queries";
 
-const Recommended = ({ books }) => {
+const Recommended = () => {
   const result = useQuery(ME);
+  const resultBooks = useQuery(ALL_BOOKS);
   if (result.loading) return <div>fetching...</div>;
+  if (resultBooks.loading) return <div>fetching...</div>;
 
   const loggedInUser = result.data.me;
+  const books = resultBooks.data.allBooks;
 
   return (
     <div>
