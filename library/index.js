@@ -201,6 +201,7 @@ const resolvers = {
     },
     allAuthors: async () => await Author.find({}),
     me: (root, args, context) => {
+      console.log(context);
       return context.currentUser;
     },
   },
@@ -313,6 +314,7 @@ startStandaloneServer(server, {
     if (auth && auth.startsWith("Bearer ")) {
       const decodedToken = jwt.verify(auth.substring(7), process.env.SECRET);
       const currentUser = await User.findById(decodedToken.id);
+      console.log(currentUser);
       return { currentUser };
     }
   },
