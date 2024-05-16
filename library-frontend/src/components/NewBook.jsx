@@ -1,6 +1,7 @@
 import { useMutation } from "@apollo/client";
 import { useState } from "react";
 import { ADD_BOOK, ALL_AUTHORS, ALL_BOOKS, BOOK_BY_GENRE } from "../queries";
+import { updateCache } from "../App";
 
 const NewBook = () => {
   const [title, setTitle] = useState("");
@@ -16,11 +17,12 @@ const NewBook = () => {
     },
     update: (cache, response) => {
       // update all books
-      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-        return {
-          allBooks: allBooks.concat(response.data.addBook),
-        };
-      });
+      // cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+      //   return {
+      //     allBooks: allBooks.concat(response.data.addBook),
+      //   };
+      // });
+      updateCache(cache, { query: ALL_BOOKS }, response.data.addBook);
 
       // author update
       const authorExists = cache
@@ -35,19 +37,28 @@ const NewBook = () => {
             allAuthors: allAuthors.concat(response.data.addBook.author.name),
           };
         });
+        // updateCache(
+        //   cache,
+        //   { query: ALL_AUTHORS },
+        //   response.data.addBook.author.name,
+        // );
       }
 
       // updating genres
 
-      genres.forEach((genre) =>
-        cache.updateQuery(
-          { query: BOOK_BY_GENRE, variables: { genre: genre } },
-          ({ allBooks }) => {
-            return {
-              allBooks: allBooks.concat(response.data.addBook),
-            };
-          },
-        ),
+      genres.forEach(
+        (genre) =>
+          cache.updateQuery(
+            { query: BOOK_BY_GENRE, variables: { genre: genre } },
+            ({ allBooks }) => {
+              return {
+                allBooks: allBooks.concat(response.data.addBook),
+              };
+            },
+          ),
+        //   updateCache(cache,
+        //     { query: BOOK_BY_GENRE, variables: { genre: genre } }, response.data.addBook)
+        //
       );
     },
     // refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],

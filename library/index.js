@@ -48,16 +48,18 @@ const start = async () => {
 
   const server = new ApolloServer({
     schema,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer }),
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
       {
         async serverWillStart() {
           return {
             async drainServer() {
               serverCleanup.dispose();
-            }
-          }
-        }
-      }],
+            },
+          };
+        },
+      },
+    ],
   });
 
   await server.start();
@@ -67,7 +69,7 @@ const start = async () => {
     cors(),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req, res }) => {
+      context: async ({ req }) => {
         const auth = req ? req.headers.authorization : null;
         if (auth && auth.startsWith("Bearer ")) {
           const decodedToken = jwt.verify(

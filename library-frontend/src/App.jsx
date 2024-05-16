@@ -5,8 +5,17 @@ import NewBook from "./components/NewBook";
 import EditBorn from "./components/EditBorn";
 import LoginForm from "./components/LoginForm";
 import { useEffect, useState } from "react";
-import { useApolloClient } from "@apollo/client";
+import { useApolloClient, useSubscription } from "@apollo/client";
 import Recommended from "./components/Recommended";
+import { ALL_BOOKS, BOOK_ADDED } from "./queries";
+
+export const updateCache = (cache, query, addedBook) => {
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: (allBooks.concat(addedBook)),
+    };
+  });
+};
 
 const App = () => {
   const navigate = useNavigate();
@@ -19,6 +28,14 @@ const App = () => {
       setToken(storedToken);
     }
   }, []);
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data, client }) => {
+      const addedBook = data.data.bookAdded;
+      window.alert(`${addedBook.title} added`);
+      updateCache(client.cache, { query: ALL_BOOKS }, addedBook);
+    },
+  });
 
   const logout = () => {
     setToken(null);

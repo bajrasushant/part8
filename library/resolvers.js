@@ -3,6 +3,8 @@ const { PubSub } = require("graphql-subscriptions");
 const pubsub = new PubSub();
 const Book = require("./models/book");
 const Author = require("./models/author");
+const User = require("./models/user");
+const jwt = require("jsonwebtoken");
 
 const resolvers = {
   Query: {
