@@ -45,8 +45,9 @@ const resolvers = {
 
   Author: {
     bookCount: async (root) => {
-      const count = await Book.collection.countDocuments({ author: root._id });
-      return count;
+      // const count = await Book.collection.countDocuments({ author: root._id });
+      // return count;
+      return root.bookCount;
     },
   },
 
@@ -64,7 +65,7 @@ const resolvers = {
       let author = await Author.findOne({ name: args.author });
 
       if (!author) {
-        author = new Author({ name: args.author });
+        author = new Author({ name: args.author, bookCount: 0 });
         try {
           await author.save();
         } catch (error) {
@@ -80,6 +81,8 @@ const resolvers = {
       const newBook = new Book({ ...args, author: author._id });
       try {
         await newBook.save();
+        author.bookCount += 1;
+        await author.save();
       } catch (error) {
         throw new GraphQLError("Saving book failed", {
           extensions: {
