@@ -9,11 +9,9 @@ import { useApolloClient, useSubscription } from "@apollo/client";
 import Recommended from "./components/Recommended";
 import { ALL_BOOKS, BOOK_ADDED } from "./queries";
 
-export const updateCache = (cache, query, addedBook) => {
-  cache.updateQuery(query, ({ allBooks }) => {
-    return {
-      allBooks: (allBooks.concat(addedBook)),
-    };
+export const updateCache = (cache, query, updateFn) => {
+  cache.updateQuery(query, (data) => {
+    return updateFn(data);
   });
 };
 
@@ -33,7 +31,11 @@ const App = () => {
     onData: ({ data, client }) => {
       const addedBook = data.data.bookAdded;
       window.alert(`${addedBook.title} added`);
-      updateCache(client.cache, { query: ALL_BOOKS }, addedBook);
+      updateCache(client.cache, { query: ALL_BOOKS }, (data) => {
+        return {
+          allBooks: data.allBooks.concat(addedBook),
+        };
+      });
     },
   });
 
